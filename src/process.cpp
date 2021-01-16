@@ -16,9 +16,8 @@ Process::Process(int pid, std::string user, std::string command) : pid_(pid), us
 int Process::Pid() const { return pid_; }
 
 float Process::CpuUtilization() const {
-  float seconds = static_cast<float>(LinuxParser::UpTime()) - static_cast<float>(LinuxParser::UpTime(Pid()));
+  float seconds = LinuxParser::UpTime() - LinuxParser::UpTime(Pid());
   return ((LinuxParser::ActiveJiffies(Pid()) / sysconf(_SC_CLK_TCK)) / seconds);
-  //return (LinuxParser::ActiveJiffies(Pid()) / seconds);
 }
 
 string Process::Command() const { return command_; }

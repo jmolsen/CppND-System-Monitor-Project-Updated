@@ -22,8 +22,7 @@ vector<Process>& System::Processes() {
   for (int pid : pids) {
     string name = LinuxParser::User(LinuxParser::Uid(pid));
     string command = LinuxParser::Command(pid);
-    Process proc(pid, name, command);
-    processes_.emplace_back(proc);
+    processes_.emplace_back(Process{pid, name, command});
   }
   std::sort(processes_.begin(), processes_.end());
   return processes_;

@@ -104,9 +104,11 @@ long LinuxParser::UpTime() {
   std::ifstream filestream(kProcDirectory + kUptimeFilename);
   if (filestream.is_open()) {
     std::getline(filestream, line);
+    // Separate any fractional time units
+    std::replace(line.begin(), line.end(), '.', ' ');
     std::istringstream linestream(line);
     linestream >> uptimeStr;
-    uptime = static_cast<long>(stof(uptimeStr));
+    uptime = stol(uptimeStr);
   }
   return uptime;
 }

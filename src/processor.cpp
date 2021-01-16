@@ -11,8 +11,8 @@ float Processor::Utilization() {
   TotalJiffies_ = LinuxParser::Jiffies();
 
   // Calculate change
-  double deltaIdle = TotalIdleJiffies_ - PrevTotalIdle;
-  double deltaTotal = TotalJiffies_ - PrevTotal;
+  float deltaIdle = TotalIdleJiffies_ - PrevTotalIdle;
+  float deltaTotal = TotalJiffies_ - PrevTotal;
 
   return (deltaTotal - deltaIdle) / deltaTotal;
 }
