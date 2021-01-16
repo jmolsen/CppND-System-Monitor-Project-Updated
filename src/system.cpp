@@ -4,6 +4,7 @@
 #include <string>
 #include <vector>
 
+#include "linux_parser.h"
 #include "process.h"
 #include "processor.h"
 #include "system.h"
@@ -13,26 +14,59 @@ using std::size_t;
 using std::string;
 using std::vector;
 
-// TODO: Return the system's CPU
 Processor& System::Cpu() { return cpu_; }
 
-// TODO: Return a container composed of the system's processes
-vector<Process>& System::Processes() { return processes_; }
+vector<Process>& System::Processes() {
+  processes_.clear();
+  vector<int> pids = LinuxParser::Pids();
+  for (int pid : pids) {
+    string name = LinuxParser::User(LinuxParser::Uid(pid));
+    string command = LinuxParser::Command(pid);
+    Process proc(pid, name, command);
+    processes_.emplace_back(proc);
+  }
+  std::sort(processes_.begin(), processes_.end());
+  return processes_;
+}
 
-// TODO: Return the system's kernel identifier (string)
-std::string System::Kernel() { return string(); }
+std::string System::Kernel() {
+  if (kernel_.empty()) {
+    kernel_ = LinuxParser::Kernel();
+  }
+  return kernel_;
+}
 
-// TODO: Return the system's memory utilization
-float System::MemoryUtilization() { return 0.0; }
+float System::MemoryUtilization() { return LinuxParser::MemoryUtilization(); }
 
-// TODO: Return the operating system name
-std::string System::OperatingSystem() { return string(); }
+std::string System::OperatingSystem() {
+  if (operatingSystem_.empty()) {
+    operatingSystem_ = LinuxParser::OperatingSystem();
+  }
+  return operatingSystem_;
+}
 
-// TODO: Return the number of processes actively running on the system
-int System::RunningProcesses() { return 0; }
+int System::RunningProcesses() { return LinuxParser::RunningProcesses(); }
 
-// TODO: Return the total number of processes on the system
-int System::TotalProcesses() { return 0; }
+int System::TotalProcesses() { return LinuxParser::TotalProcesses(); }
 
-// TODO: Return the number of seconds since the system started running
-long int System::UpTime() { return 0; }
+long System::UpTime() {
+  long uptime = LinuxParser::UpTime();
+
+  // If kernel version < 2.6, then uptime stored as jiffies and need to be divided by sysconf(_SC_CLK_TCK)
+  string fullKernel = Kernel();
+  size_t pos = 0;
+  // Get index of second instance of "."
+  for (int i = 0; i < 2; i++) {
+    pos = fullKernel.find(".", ++pos);
+    if (pos == string::npos) {
+      pos = 2;
+      break;
+    }
+  }
+  float kernelVersion = stof(fullKernel.substr(0, pos));
+  if (kernelVersion < 2.6) {
+    uptime /= sysconf(_SC_CLK_TCK);
+  }
+
+  return uptime;
+}

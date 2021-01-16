@@ -50,7 +50,7 @@ long IdleJiffies();
 std::string Command(int pid);
 std::string Ram(int pid);
 std::string Uid(int pid);
-std::string User(int pid);
+std::string User(std::string userId);
 long int UpTime(int pid);
 };  // namespace LinuxParser
 
